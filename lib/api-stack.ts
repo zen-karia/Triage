@@ -2,15 +2,22 @@ import * as cdk from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
 import { Code, Function, Runtime } from "aws-cdk-lib/aws-lambda";
 import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { Table } from 'aws-cdk-lib/aws-dynamodb';
 
+interface ApiStackProps extends cdk.StackProps {
+    orderTable: Table;
+}
 export class ApiStack extends cdk.Stack {
-    constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    constructor(scope: Construct, id: string, props: ApiStackProps) {
         super(scope, id, props);
 
         const orderHandler = new Function(this, 'OrderHandler', {
             runtime: Runtime.NODEJS_22_X,
-            handler: 'something.handler', // need to fill in the real handler name
-            code: Code.fromAsset('lambda')
+            handler: 'createOrder.handler',
+            code: Code.fromAsset('lambda'),
+            environment: {
+                TABLE_NAME: props.orderTable.tableName
+            }
         });
 
         const orderApi = new RestApi(this, 'OrdersApi', {
@@ -19,5 +26,7 @@ export class ApiStack extends cdk.Stack {
 
         const orders = orderApi.root.addResource('orders');
         orders.addMethod('POST', new LambdaIntegration(orderHandler));
+
+        props.orderTable.grantWriteData(orderHandler);
     }
 }

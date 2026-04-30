@@ -5,10 +5,8 @@ import { ApiStack } from '../lib/api-stack';
 
 const app = new cdk.App();
 
-new PersistenceStack(app, 'PersistenceStack', {
-
-});
+const persistenceStack = new PersistenceStack(app, 'PersistenceStack', {});
 
 new ApiStack(app, 'ApiStack', {
-
+  orderTable: persistenceStack.orderTable
 });
