@@ -5,7 +5,7 @@ An Event-Driven order processing Pipeline with AI Fraud Detection.
 Architecture diagram coming soon.
 
 ## Current State
-Project scaffolded with CDK TypeScript. GitHub Actions CI configured to run build and tests on every push and pull request to main.
+Implemented the order ingestion path: `POST /orders` via API Gateway triggers a Lambda handler that validates the request, writes the order to a DynamoDB table, and returns a 201 with the generated `orderId`. Both stacks (`PersistenceStack`, `ApiStack`) deployed to AWS and verified end-to-end. Jest unit tests cover input validation and order creation scenarios.
 
 ## Tech Stack
 - **Languages:** TypeScript (CDK + Lambda handlers)
