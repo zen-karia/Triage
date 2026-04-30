@@ -16,7 +16,7 @@ export const handler = async (event: any) => {
     }
 
     const orderObject = {
-        "orderId": randomUUID(),
+        "orderID": randomUUID(),
         "customerId": body.customerId,
         "items": body.items,
         "totalAmount": body.totalAmount,
@@ -31,6 +31,6 @@ export const handler = async (event: any) => {
 
     return {
         statusCode: 201,
-        body: JSON.stringify({ orderId: orderObject.orderId })
+        body: JSON.stringify({ orderId: orderObject.orderID })
     };
 }

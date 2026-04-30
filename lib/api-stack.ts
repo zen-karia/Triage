@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
-import { Code, Function, Runtime } from "aws-cdk-lib/aws-lambda";
+import { Runtime } from "aws-cdk-lib/aws-lambda";
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 
@@ -11,14 +12,15 @@ export class ApiStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props: ApiStackProps) {
         super(scope, id, props);
 
-        const orderHandler = new Function(this, 'OrderHandler', {
+        const orderHandler = new NodejsFunction(this, 'OrderHandler', {
+            entry: 'lambda/createOrder.ts',
+            handler: 'handler',
             runtime: Runtime.NODEJS_22_X,
-            handler: 'createOrder.handler',
-            code: Code.fromAsset('lambda'),
             environment: {
                 TABLE_NAME: props.orderTable.tableName
             }
         });
+
 
         const orderApi = new RestApi(this, 'OrdersApi', {
             restApiName: 'Orders Service'
