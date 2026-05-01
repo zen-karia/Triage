@@ -3,7 +3,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 
 const client = new DynamoDBClient({});
-const dynamo = DynamoDBDocumentClient.from(client);
+const dynamo = DynamoDBDocumentClient.from(client); // we use DynamoDBDocumentClient over raw client because the former handles the marshalling of annotating according to DynamoDB's type system so that we can write plain JS objects
 
 export const handler = async (event: any) => {
     const body = JSON.parse(event.body);
