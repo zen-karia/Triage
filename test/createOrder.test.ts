@@ -5,6 +5,11 @@ jest.mock('@aws-sdk/lib-dynamodb', () => ({
     PutCommand: jest.fn()
 }));
 
+jest.mock('@aws-sdk/client-sqs', () => ({
+    SQSClient: jest.fn().mockImplementation(() => ({ send: jest.fn() })),
+    SendMessageCommand: jest.fn()
+}));
+
 test('returns 400 when customerId is missing', async () => {
     const event = {
         body: JSON.stringify({ items: ['item1'], totalAmount: 100 })
