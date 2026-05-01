@@ -8,9 +8,9 @@ const app = new cdk.App();
 
 const persistenceStack = new PersistenceStack(app, 'PersistenceStack', {});
 
-const messagingStack = new MessagingStack(app, 'MessagingStack', {});
+const messagingStack = new MessagingStack(app, 'MessagingStack', {orderTable: persistenceStack.orderTable});
 
-new ApiStack(app, 'ApiStack', {
+const apiStack = new ApiStack(app, 'ApiStack', {
   orderTable: persistenceStack.orderTable,
   orderQueue: messagingStack.orderQueue
 });

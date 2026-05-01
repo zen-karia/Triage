@@ -38,6 +38,6 @@ export const handler = async (event: any) => {
 
     return {
         statusCode: 201,
-        body: JSON.stringify({ orderId: orderObject.orderID })
+        body: JSON.stringify({ message: `Order received successfully, order id: ${orderObject.orderID}` })
     };
 }
