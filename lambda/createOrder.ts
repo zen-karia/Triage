@@ -1,9 +1,11 @@
 import { randomUUID } from 'crypto';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
+import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 
-const client = new DynamoDBClient({});
-const dynamo = DynamoDBDocumentClient.from(client); // we use DynamoDBDocumentClient over raw client because the former handles the marshalling of annotating according to DynamoDB's type system so that we can write plain JS objects
+const dynamoclient = new DynamoDBClient({});
+const dynamo = DynamoDBDocumentClient.from(dynamoclient); // we use DynamoDBDocumentClient over raw client because the former handles the marshalling of annotating according to DynamoDB's type system so that we can write plain JS objects
+const sqsclient = new SQSClient({});
 
 export const handler = async (event: any) => {
     const body = JSON.parse(event.body);
@@ -28,6 +30,11 @@ export const handler = async (event: any) => {
         TableName: process.env.TABLE_NAME,
         Item: orderObject
     }));
+
+    await sqsclient.send(new SendMessageCommand({
+        QueueUrl: process.env.QUEUE_URL,
+        MessageBody: JSON.stringify(orderObject)
+    }))
 
     return {
         statusCode: 201,
