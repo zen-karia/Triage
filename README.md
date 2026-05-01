@@ -5,7 +5,7 @@ An Event-Driven order processing Pipeline with AI Fraud Detection.
 Architecture diagram coming soon.
 
 ## Current State
-Implemented the order ingestion path: `POST /orders` via API Gateway triggers a Lambda handler that validates the request, writes the order to a DynamoDB table, and returns a 201 with the generated `orderId`. Both stacks (`PersistenceStack`, `ApiStack`) deployed to AWS and verified end-to-end. Jest unit tests cover input validation and order creation scenarios.
+Implemented async order processing pipeline. `POST /orders` via API Gateway triggers a Lambda handler that validates the request, writes the order to DynamoDB, publishes an `OrderCreated` message to SQS, and returns a 201 with the generated `orderId`. A separate worker Lambda is triggered by SQS and logs the order for downstream processing. Three stacks (`PersistenceStack`, `MessagingStack`, `ApiStack`) deployed to AWS and verified end-to-end. Jest unit tests cover input validation and order creation scenarios.
 
 ## Tech Stack
 - **Languages:** TypeScript (CDK + Lambda handlers)
