@@ -14,7 +14,14 @@ export class MessagingStack extends cdk.Stack { // Separate Stack for orderQueue
     constructor(scope: Construct,  id: string, props: MessagingStackProps) {
         super(scope, id, props);
         
-        this.orderQueue = new Queue(this, "OrderQueue");
+        const dlq = new Queue(this, "OrderDLQ");
+        
+        this.orderQueue = new Queue(this, "OrderQueue", {
+            deadLetterQueue: {
+                queue: dlq,
+                maxReceiveCount: 3
+            }
+        });
 
         const workerHandler = new NodejsFunction(this, 'WorkerHandler', {
             entry: 'lambda/orderWorker.ts',

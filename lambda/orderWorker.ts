@@ -6,7 +6,7 @@ const dynamo = DynamoDBDocumentClient.from(dynamoclient);
 
 export const handler = async (event: any) => {
     for (const record of event.Records) {
-        const currOrder = JSON.parse(record.body)
+        const currOrder = JSON.parse(record.body);
         try {
             await dynamo.send(new UpdateCommand({
                 TableName: process.env.TABLE_NAME,
