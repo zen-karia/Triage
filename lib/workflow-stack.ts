@@ -6,6 +6,7 @@ import { StateMachine, Chain } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 
 export class WorkflowStack extends cdk.Stack {
+    public readonly orderStateMachine: StateMachine;
     constructor(scope: Construct, id: string, props: cdk.StackProps) {
         super(scope, id, props);
 
@@ -55,6 +56,6 @@ export class WorkflowStack extends cdk.Stack {
 
         const definition = Chain.start(aiFraudScoreTask).next(checkInventoryTask).next(processPaymentTask).next(fulfillOrderTask);
 
-        new StateMachine(this, 'OrderWorkflow', {definition});
+        this.orderStateMachine = new StateMachine(this, 'OrderWorkflow', {definition});
     }
 }

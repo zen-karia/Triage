@@ -5,9 +5,11 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
+import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 
 interface MessagingStackProps extends cdk.StackProps {
-    orderTable: Table
+    orderTable: Table,
+    orderStateMachine: StateMachine
 }
 export class MessagingStack extends cdk.Stack { // Separate Stack for orderQueue because its job is to pass the order details forward from the handler after writing to the table for further processing like fraud scoring etc.
     public readonly orderQueue: Queue
@@ -15,7 +17,7 @@ export class MessagingStack extends cdk.Stack { // Separate Stack for orderQueue
         super(scope, id, props);
         
         const dlq = new Queue(this, "OrderDLQ");
-        
+
         this.orderQueue = new Queue(this, "OrderQueue", {
             deadLetterQueue: {
                 queue: dlq,
@@ -28,12 +30,15 @@ export class MessagingStack extends cdk.Stack { // Separate Stack for orderQueue
             handler: 'handler',
             runtime: Runtime.NODEJS_22_X,
             environment: {
-                TABLE_NAME: props.orderTable.tableName
+                TABLE_NAME: props.orderTable.tableName,
+                STATE_MACHINE_ARN: props.orderStateMachine.stateMachineArn
             }
         });
 
         workerHandler.addEventSource(new SqsEventSource(this.orderQueue));
 
         props.orderTable.grantWriteData(workerHandler);
+
+        props.orderStateMachine.grantStartExecution(workerHandler)
     }
 }
