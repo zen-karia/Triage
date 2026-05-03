@@ -9,7 +9,7 @@ const app = new cdk.App();
 
 const persistenceStack = new PersistenceStack(app, 'PersistenceStack', {});
 
-const workflowStack = new WorkflowStack(app, 'WorkflowStack', {})
+const workflowStack = new WorkflowStack(app, 'WorkflowStack', {orderTable: persistenceStack.orderTable})
 
 const messagingStack = new MessagingStack(app, 'MessagingStack', {orderTable: persistenceStack.orderTable, orderStateMachine: workflowStack.orderStateMachine});
 
