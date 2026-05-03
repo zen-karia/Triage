@@ -5,7 +5,7 @@ An Event-Driven order processing Pipeline with AI Fraud Detection.
 Architecture diagram coming soon.
 
 ## Current State
-Implemented full async order processing pipeline with resilience. `POST /orders` via API Gateway triggers a Lambda handler that validates the request, writes the order to DynamoDB, publishes an `OrderCreated` message to SQS, and returns a 201 immediately. A worker Lambda triggered by SQS processes orders idempotently — using a conditional DynamoDB `UpdateCommand` to transition status from `PENDING` to `PROCESSING`, preventing duplicate processing on SQS retries. A dead-letter queue catches messages that fail after 3 attempts. Three stacks (`PersistenceStack`, `MessagingStack`, `ApiStack`) deployed to AWS and verified end-to-end including DLQ behaviour. Jest unit tests cover input validation and order creation scenarios.
+Implemented full async order processing pipeline with Step Functions orchestration. `POST /orders` via API Gateway triggers a Lambda that validates, writes to DynamoDB, publishes to SQS, and returns 201 immediately. A worker Lambda processes orders idempotently (conditional `UpdateCommand` prevents duplicate processing) and starts a Step Functions state machine. The state machine runs four steps in sequence — `AIFraudScore → CheckInventory → ProcessPayment → FulfillOrder` — each updating the order status in DynamoDB. A dead-letter queue catches messages that fail after 3 attempts. Four stacks (`PersistenceStack`, `MessagingStack`, `ApiStack`, `WorkflowStack`) deployed to AWS and verified end-to-end with order reaching `COMPLETED` status. Jest unit tests cover ingestion validation and worker idempotency logic.
 
 ## Tech Stack
 - **Languages:** TypeScript (CDK + Lambda handlers)
