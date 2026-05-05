@@ -31,7 +31,7 @@ export const handler = async (event : any) => {
     A score above 0.7 indicates high fraud risk.`
 
     const response = await bedrockclient.send(new InvokeModelCommand({
-        modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
+        modelId: 'arn:aws:bedrock:us-east-1:338246863505:inference-profile/global.anthropic.claude-haiku-4-5-20251001-v1:0',
         contentType: 'application/json',
         accept: 'application/json',
         body: JSON.stringify({
@@ -42,7 +42,8 @@ export const handler = async (event : any) => {
     }));
 
     const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-    const { score, reasoning } = JSON.parse(responseBody.content[0].text);
+    const rawText = responseBody.content[0].text.replace(/```json\n?|\n?```/g, '').trim();
+    const { score, reasoning } = JSON.parse(rawText);
 
     await dynamo.send(new UpdateCommand({
         TableName: process.env.TABLE_NAME,
