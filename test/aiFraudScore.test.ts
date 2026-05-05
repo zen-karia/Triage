@@ -5,6 +5,8 @@ import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 var mockDynamoSend = jest.fn();
 // eslint-disable-next-line no-var
 var mockBedrockSend = jest.fn();
+// eslint-disable-next-line no-var
+var mockCloudWatchSend = jest.fn();
 
 jest.mock('@aws-sdk/client-dynamodb', () => ({
     DynamoDBClient: jest.fn().mockImplementation(() => ({}))
@@ -20,9 +22,15 @@ jest.mock('@aws-sdk/client-bedrock-runtime', () => ({
     InvokeModelCommand: jest.fn()
 }));
 
+jest.mock('@aws-sdk/client-cloudwatch', () => ({
+    CloudWatchClient: jest.fn().mockImplementation(() => ({ send: (...args: any[]) => mockCloudWatchSend(...args) })),
+    PutMetricDataCommand: jest.fn()
+}));
+
 const makeBedrockResponse = (score: number, reasoning: string) => ({
     body: new TextEncoder().encode(JSON.stringify({
-        content: [{ text: JSON.stringify({ score, reasoning }) }]
+        content: [{ text: JSON.stringify({ score, reasoning }) }],
+        usage: { input_tokens: 100, output_tokens: 50 }
     }))
 });
 
@@ -31,6 +39,7 @@ const order = { orderID: 'abc-123', customerId: 'c1', items: ['book'], totalAmou
 beforeEach(() => {
     mockDynamoSend.mockReset();
     mockBedrockSend.mockReset();
+    mockCloudWatchSend.mockResolvedValue({});
     (UpdateCommand as unknown as jest.Mock).mockClear();
 });
 
@@ -64,7 +73,8 @@ test('parses markdown-wrapped Bedrock response correctly', async () => {
     mockDynamoSend.mockResolvedValue({});
     mockBedrockSend.mockResolvedValueOnce({
         body: new TextEncoder().encode(JSON.stringify({
-            content: [{ text: '```json\n{"score": 0.5, "reasoning": "Medium risk"}\n```' }]
+            content: [{ text: '```json\n{"score": 0.5, "reasoning": "Medium risk"}\n```' }],
+            usage: { input_tokens: 100, output_tokens: 50 }
         }))
     });
     const result = await handler(order as any);
@@ -75,7 +85,8 @@ test('throws on malformed Bedrock response', async () => {
     mockDynamoSend.mockResolvedValue({});
     mockBedrockSend.mockResolvedValueOnce({
         body: new TextEncoder().encode(JSON.stringify({
-            content: [{ text: 'this is not json' }]
+            content: [{ text: 'this is not json' }],
+            usage: { input_tokens: 100, output_tokens: 50 }
         }))
     });
     await expect(handler(order as any)).rejects.toThrow();
