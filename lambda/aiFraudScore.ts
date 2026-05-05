@@ -1,10 +1,12 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
+import { CloudWatchClient, PutMetricDataCommand } from "@aws-sdk/client-cloudwatch"
 
 const dynamoclient = new DynamoDBClient({});
 const dynamo = DynamoDBDocumentClient.from(dynamoclient);
 const bedrockclient = new BedrockRuntimeClient({ region: 'us-east-1' });
+const cloudwatchclient = new CloudWatchClient({});
 
 export const handler = async (event : any) => {
     console.log('AIFraudScore executing', event);
@@ -44,6 +46,18 @@ export const handler = async (event : any) => {
     const responseBody = JSON.parse(new TextDecoder().decode(response.body));
     const rawText = responseBody.content[0].text.replace(/```json\n?|\n?```/g, '').trim();
     const { score, reasoning } = JSON.parse(rawText);
+
+    const estimated_cost = (responseBody.usage.input_tokens / 1000 * 0.0008) + 
+                            (responseBody.usage.output_tokens / 1000 * 0.004);
+    
+    await cloudwatchclient.send(new PutMetricDataCommand({
+        Namespace: 'Triage/Bedrock',
+        MetricData: [{
+            MetricName: 'CostPerCall',
+            Value: estimated_cost,
+            Unit: 'None'
+        }]
+    }));
 
     await dynamo.send(new UpdateCommand({
         TableName: process.env.TABLE_NAME,

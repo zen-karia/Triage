@@ -130,5 +130,10 @@ export class WorkflowStack extends cdk.Stack {
             actions: ['bedrock:InvokeModel'],
             resources: ['*']
         }));
+
+        aiFraudScoreHandler.addToRolePolicy(new iam.PolicyStatement({
+            actions: ['cloudwatch:PutMetricData'],
+            resources: ['*']
+        }));
     }
 }
