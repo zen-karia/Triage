@@ -3,13 +3,15 @@ import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { StateMachine, Chain, Fail, TaskInput, Choice, Condition } from 'aws-cdk-lib/aws-stepfunctions';
-import { LambdaInvoke, SqsSendMessage } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { LambdaInvoke, SqsSendMessage, EventBridgePutEvents } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
+import { EventBus } from 'aws-cdk-lib/aws-events';
 
 interface WorkflowStackProps extends cdk.StackProps {
-    orderTable: Table
+    orderTable: Table,
+    orderEventBus: EventBus
 }
 export class WorkflowStack extends cdk.Stack {
     public readonly orderStateMachine: StateMachine;
@@ -112,10 +114,29 @@ export class WorkflowStack extends cdk.Stack {
             messageBody: TaskInput.fromJsonPathAt('$')
         });
 
+        const publishOrderCompleted = new EventBridgePutEvents(this, 'PublishOrderCompleted', {
+            entries: [{
+                eventBus: props.orderEventBus,
+                source: 'triage.orders',
+                detailType: 'OrderCompleted',
+                detail: TaskInput.fromJsonPathAt('$')
+            }]
+        });
+
+        const publishOrderFlagged = new EventBridgePutEvents(this, 'PublishOrderFlagged', {
+            entries: [{
+                eventBus: props.orderEventBus,
+                source: 'triage.orders',
+                detailType: 'OrderFlagged',
+                detail: TaskInput.fromJsonPathAt('$')
+            }]
+        });
+
         const fraudCheck = new Choice(this, 'FraudCheck');
         fraudCheck
-            .when(Condition.numberGreaterThan('$.fraudScore', 0.7), manualReviewTask)
-            .otherwise(checkInventoryTask.next(processPaymentTask).next(fulfillOrderTask));
+            .when(Condition.numberGreaterThan('$.fraudScore', 0.7), manualReviewTask.next(publishOrderFlagged))
+            .otherwise(checkInventoryTask.next(processPaymentTask).next(fulfillOrderTask.next(publishOrderCompleted)));
+
 
         const definition = Chain.start(aiFraudScoreTask).next(fraudCheck);
 
@@ -135,5 +156,7 @@ export class WorkflowStack extends cdk.Stack {
             actions: ['cloudwatch:PutMetricData'],
             resources: ['*']
         }));
+
+        props.orderEventBus.grantPutEventsTo(this.orderStateMachine);
     }
 }

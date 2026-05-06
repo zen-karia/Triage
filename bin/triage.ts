@@ -4,12 +4,15 @@ import { PersistenceStack } from '../lib/persistence-stack';
 import { ApiStack } from '../lib/api-stack';
 import { MessagingStack } from '../lib/messaging-stack';
 import { WorkflowStack } from '../lib/workflow-stack';
+import { EventBridgeStack } from '../lib/eventBridge-stack';
 
 const app = new cdk.App();
 
 const persistenceStack = new PersistenceStack(app, 'PersistenceStack', {});
 
-const workflowStack = new WorkflowStack(app, 'WorkflowStack', {orderTable: persistenceStack.orderTable})
+const eventBridgeStack = new EventBridgeStack(app, 'EventBridgeStack', {});
+
+const workflowStack = new WorkflowStack(app, 'WorkflowStack', {orderTable: persistenceStack.orderTable, orderEventBus: eventBridgeStack.orderEventBus})
 
 const messagingStack = new MessagingStack(app, 'MessagingStack', {orderTable: persistenceStack.orderTable, orderStateMachine: workflowStack.orderStateMachine});
 
