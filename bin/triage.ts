@@ -4,7 +4,7 @@ import { PersistenceStack } from '../lib/persistence-stack';
 import { ApiStack } from '../lib/api-stack';
 import { MessagingStack } from '../lib/messaging-stack';
 import { WorkflowStack } from '../lib/workflow-stack';
-import { EventBridgeStack } from '../lib/eventBridge-stack';
+import { EventBridgeStack } from '../lib/eventbridge-stack';
 
 const app = new cdk.App();
 
