@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Runtime, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import * as iam from 'aws-cdk-lib/aws-iam';
 
@@ -20,7 +20,8 @@ export class EventBridgeStack extends cdk.Stack {
             environment: {
                 SENDER_EMAIL: 'zenilkaria2006@gmail.com',
                 RECIPIENT_EMAIL: 'zenilkaria2006@gmail.com'
-            }
+            },
+            tracing: Tracing.ACTIVE
         });
 
         sendOrderConfirmationHandler.addToRolePolicy(new iam.PolicyStatement({

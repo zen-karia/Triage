@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Runtime, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { StateMachine, Chain, Fail, TaskInput, Choice, Condition } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke, SqsSendMessage, EventBridgePutEvents } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
@@ -24,7 +24,8 @@ export class WorkflowStack extends cdk.Stack {
             runtime: Runtime.NODEJS_22_X,
             environment: {
                 TABLE_NAME: props.orderTable.tableName
-            }
+            },
+            tracing: Tracing.ACTIVE
         });
 
         const checkInventoryHandler = new NodejsFunction(this, 'CheckInventoryHandler', {
@@ -33,7 +34,8 @@ export class WorkflowStack extends cdk.Stack {
             runtime: Runtime.NODEJS_22_X,
             environment: {
                 TABLE_NAME: props.orderTable.tableName
-            }
+            },
+            tracing: Tracing.ACTIVE
         });
 
         const processPaymentHandler = new NodejsFunction(this, 'ProcessPaymentHandler', {
@@ -42,7 +44,8 @@ export class WorkflowStack extends cdk.Stack {
             runtime: Runtime.NODEJS_22_X,
             environment: {
                 TABLE_NAME: props.orderTable.tableName
-            }
+            },
+            tracing: Tracing.ACTIVE
         });
 
         const fulfillOrderHandler = new NodejsFunction(this, 'FulfillOrderHandler', {
@@ -51,7 +54,8 @@ export class WorkflowStack extends cdk.Stack {
             runtime: Runtime.NODEJS_22_X,
             environment: {
                 TABLE_NAME: props.orderTable.tableName
-            }
+            },
+            tracing: Tracing.ACTIVE
         });
 
         const failstate = new Fail(this, 'OrderFailed', {
@@ -140,7 +144,7 @@ export class WorkflowStack extends cdk.Stack {
 
         const definition = Chain.start(aiFraudScoreTask).next(fraudCheck);
 
-        this.orderStateMachine = new StateMachine(this, 'OrderWorkflow', {definition});
+        this.orderStateMachine = new StateMachine(this, 'OrderWorkflow', {definition, tracingEnabled: true});
 
         props.orderTable.grantWriteData(aiFraudScoreHandler);
         props.orderTable.grantWriteData(checkInventoryHandler);

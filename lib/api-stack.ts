@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
-import { Runtime } from "aws-cdk-lib/aws-lambda";
+import { Runtime, Tracing } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
@@ -21,7 +21,8 @@ export class ApiStack extends cdk.Stack {
             environment: {
                 TABLE_NAME: props.orderTable.tableName,
                 QUEUE_URL: props.orderQueue.queueUrl
-            }
+            },
+            tracing: Tracing.ACTIVE
         });
 
 

@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Runtime, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
@@ -32,7 +32,8 @@ export class MessagingStack extends cdk.Stack { // Separate Stack for orderQueue
             environment: {
                 TABLE_NAME: props.orderTable.tableName,
                 STATE_MACHINE_ARN: props.orderStateMachine.stateMachineArn
-            }
+            },
+            tracing: Tracing.ACTIVE
         });
 
         workerHandler.addEventSource(new SqsEventSource(this.orderQueue));
