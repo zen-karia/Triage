@@ -13,14 +13,15 @@ interface MessagingStackProps extends cdk.StackProps {
 }
 export class MessagingStack extends cdk.Stack { // Separate Stack for orderQueue because its job is to pass the order details forward from the handler after writing to the table for further processing like fraud scoring etc.
     public readonly orderQueue: Queue
+    public readonly dlq: Queue
     constructor(scope: Construct,  id: string, props: MessagingStackProps) {
         super(scope, id, props);
         
-        const dlq = new Queue(this, "OrderDLQ");
+        this.dlq = new Queue(this, "OrderDLQ");
 
         this.orderQueue = new Queue(this, "OrderQueue", {
             deadLetterQueue: {
-                queue: dlq,
+                queue: this.dlq,
                 maxReceiveCount: 3
             }
         });

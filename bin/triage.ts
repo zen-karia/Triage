@@ -5,6 +5,7 @@ import { ApiStack } from '../lib/api-stack';
 import { MessagingStack } from '../lib/messaging-stack';
 import { WorkflowStack } from '../lib/workflow-stack';
 import { EventBridgeStack } from '../lib/eventBridge-stack';
+import { ObservabilityStack } from '../lib/observability-stack';
 
 const app = new cdk.App();
 
@@ -20,3 +21,7 @@ new ApiStack(app, 'ApiStack', {
   orderTable: persistenceStack.orderTable,
   orderQueue: messagingStack.orderQueue
 });
+
+new ObservabilityStack(app, 'ObservabilityStack', {
+  dlq: messagingStack.dlq
+})
