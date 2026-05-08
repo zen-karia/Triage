@@ -1,5 +1,6 @@
 *.js
 !jest.config.js
+!load-test/
 *.d.ts
 node_modules
 
