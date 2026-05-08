@@ -11,10 +11,21 @@ The state machine runs: `AIFraudScore → Choice → CheckInventory → ProcessP
 
 On workflow completion, Step Functions publishes domain events (`OrderCompleted`, `OrderFlagged`) to a custom EventBridge bus. An EventBridge rule routes `OrderCompleted` to a Lambda that sends a confirmation email via SES. X-Ray active tracing is enabled on all Lambdas and the Step Functions state machine, providing end-to-end distributed traces through the fraud scoring step. A CloudWatch dashboard (`Triage-Orders`) exposes request rate, p50/p95/p99 Lambda latency, error rate, DLQ depth, and Bedrock cost per call. Six stacks (`PersistenceStack`, `MessagingStack`, `ApiStack`, `WorkflowStack`, `EventBridgeStack`, `ObservabilityStack`) deployed to AWS and verified end-to-end. Jest unit tests cover ingestion validation, worker idempotency, and fraud scoring logic.
 
-Load testing is in progress using k6 (ramp to 100 req/s over 30s, hold for 5 minutes). Initial smoke testing revealed two bottlenecks:
+Load tested using k6 (100 VUs, 30s ramp, 5-minute hold). Two bottlenecks found and fixed before the full run:
 
 - **DynamoDB provisioned capacity** — the default 5 WCU/s caused ~45% request failures under concurrent load. Fixed by switching to `PAY_PER_REQUEST` billing mode.
-- **Lambda account concurrency limit** — account was capped at 10 concurrent executions (set as a cost protection measure during setup), causing Lambda throttling under load. Quota increase to 1,000 pending AWS Support approval; full load test results to follow.
+- **Lambda account concurrency limit** — account was capped at 10 concurrent executions (set as a cost protection measure during setup), causing Lambda throttling under load. Fixed by increasing the Service Quota to 1,000.
+
+Full load test results (100 VUs, 84 req/s sustained, 30,334 total requests):
+
+| Metric | Value |
+|--------|-------|
+| Throughput | 84 req/s |
+| p95 latency | 130ms |
+| p99 latency | 212ms |
+| Error rate | 0% |
+
+p99 at full load (212ms) was lower than the smoke test p99 (275ms) — Lambda instances warmed up under sustained load. Bedrock runs async inside Step Functions and does not contribute to the `POST /orders` latency numbers above.
 
 Lambda memory sizes tuned using AWS Lambda Power Tuning (10 invocations per memory configuration across 128/256/512/1024MB):
 
