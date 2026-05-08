@@ -22,7 +22,8 @@ export class ApiStack extends cdk.Stack {
                 TABLE_NAME: props.orderTable.tableName,
                 QUEUE_URL: props.orderQueue.queueUrl
             },
-            tracing: Tracing.ACTIVE
+            tracing: Tracing.ACTIVE,
+            memorySize: 256
         });
 
 

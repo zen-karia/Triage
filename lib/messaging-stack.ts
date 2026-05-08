@@ -34,7 +34,8 @@ export class MessagingStack extends cdk.Stack { // Separate Stack for orderQueue
                 TABLE_NAME: props.orderTable.tableName,
                 STATE_MACHINE_ARN: props.orderStateMachine.stateMachineArn
             },
-            tracing: Tracing.ACTIVE
+            tracing: Tracing.ACTIVE,
+            memorySize: 512
         });
 
         workerHandler.addEventSource(new SqsEventSource(this.orderQueue));

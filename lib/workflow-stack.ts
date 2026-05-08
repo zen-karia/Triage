@@ -35,7 +35,8 @@ export class WorkflowStack extends cdk.Stack {
             environment: {
                 TABLE_NAME: props.orderTable.tableName
             },
-            tracing: Tracing.ACTIVE
+            tracing: Tracing.ACTIVE,
+            memorySize: 1024
         });
 
         const processPaymentHandler = new NodejsFunction(this, 'ProcessPaymentHandler', {
@@ -45,7 +46,8 @@ export class WorkflowStack extends cdk.Stack {
             environment: {
                 TABLE_NAME: props.orderTable.tableName
             },
-            tracing: Tracing.ACTIVE
+            tracing: Tracing.ACTIVE,
+            memorySize: 512
         });
 
         const fulfillOrderHandler = new NodejsFunction(this, 'FulfillOrderHandler', {
@@ -55,7 +57,8 @@ export class WorkflowStack extends cdk.Stack {
             environment: {
                 TABLE_NAME: props.orderTable.tableName
             },
-            tracing: Tracing.ACTIVE
+            tracing: Tracing.ACTIVE,
+            memorySize: 512
         });
 
         const failstate = new Fail(this, 'OrderFailed', {
