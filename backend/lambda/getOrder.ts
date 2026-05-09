@@ -13,6 +13,7 @@ export const handler = async (event: any) => {
     }));
 
     return {
+        headers: { 'Access-Control-Allow-Origin': '*' },
         statusCode: 200,
         body: JSON.stringify(orderObject.Item)
     };

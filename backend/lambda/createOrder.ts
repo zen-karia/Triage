@@ -12,6 +12,7 @@ export const handler = async (event: any) => {
 
     if (!body.customerId || !body.items || !body.totalAmount) {
         return {
+            headers: { 'Access-Control-Allow-Origin': '*' },
             statusCode: 400,
             body: `Customer Order doesn't contain one of customerId, items, or totalAmount\n`
         }
@@ -37,6 +38,7 @@ export const handler = async (event: any) => {
     }))
 
     return {
+        headers: { 'Access-Control-Allow-Origin': '*' },
         statusCode: 201,
         body: JSON.stringify({ message: `Order received successfully, order id: ${orderObject.orderID}` })
     };

@@ -41,8 +41,17 @@ export class ApiStack extends cdk.Stack {
             tracing: Tracing.ACTIVE
         });
 
-        const orders = orderApi.root.addResource('orders');
-        const orderId = orders.addResource('{orderId}');
+        const orders = orderApi.root.addResource('orders', {
+            defaultCorsPreflightOptions: {
+            allowOrigins: ['*'],
+            allowMethods: ['POST', 'OPTIONS']
+        }});
+        const orderId = orders.addResource('{orderId}', {
+            defaultCorsPreflightOptions: {
+            allowOrigins: ['*'],
+            allowMethods: ['GET', 'OPTIONS']
+            }
+        });
         orders.addMethod('POST', new LambdaIntegration(orderHandler));
         orderId.addMethod('GET', new LambdaIntegration(getOrderHandler));
 
