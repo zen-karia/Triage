@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
 import { Runtime, Tracing } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { LambdaIntegration, RestApi, Period } from 'aws-cdk-lib/aws-apigateway';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 
@@ -52,13 +52,23 @@ export class ApiStack extends cdk.Stack {
             allowMethods: ['GET', 'OPTIONS']
             }
         });
-        orders.addMethod('POST', new LambdaIntegration(orderHandler));
-        orderId.addMethod('GET', new LambdaIntegration(getOrderHandler));
+        orders.addMethod('POST', new LambdaIntegration(orderHandler), { apiKeyRequired: true });
+        orderId.addMethod('GET', new LambdaIntegration(getOrderHandler), { apiKeyRequired: true });
 
         props.orderTable.grantWriteData(orderHandler); // AWS is default-deny so need to explicitly grant the lambda handler permission to write to the DynamoDB Table.
 
         props.orderQueue.grantSendMessages(orderHandler); // AWS is default-deny so need to explicitly grant the lambda handler permission to send messages to the SQS Order Queue.
 
         props.orderTable.grantReadData(getOrderHandler);
+
+        const apiKey = orderApi.addApiKey('DemoApiKey');
+
+        const usagePlan = orderApi.addUsagePlan('DemoUsagePlan', {
+            throttle: { rateLimit: 10, burstLimit: 20 },
+            quota: { limit: 1000, period: Period.DAY }
+        });
+
+        usagePlan.addApiStage({ stage: orderApi.deploymentStage });
+        usagePlan.addApiKey(apiKey);
     }
 }
