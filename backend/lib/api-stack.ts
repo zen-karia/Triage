@@ -31,11 +31,25 @@ export class ApiStack extends cdk.Stack {
             restApiName: 'Orders Service'
         });
 
+        const getOrderHandler =  new NodejsFunction(this, 'GetOrderHandler', {
+            entry: 'lambda/getOrder.ts',
+            handler: 'handler',
+            runtime: Runtime.NODEJS_22_X,
+            environment: {
+                TABLE_NAME: props.orderTable.tableName
+            },
+            tracing: Tracing.ACTIVE
+        });
+
         const orders = orderApi.root.addResource('orders');
+        const orderId = orders.addResource('{orderId}');
         orders.addMethod('POST', new LambdaIntegration(orderHandler));
+        orderId.addMethod('GET', new LambdaIntegration(getOrderHandler));
 
         props.orderTable.grantWriteData(orderHandler); // AWS is default-deny so need to explicitly grant the lambda handler permission to write to the DynamoDB Table.
 
         props.orderQueue.grantSendMessages(orderHandler); // AWS is default-deny so need to explicitly grant the lambda handler permission to send messages to the SQS Order Queue.
+
+        props.orderTable.grantReadData(getOrderHandler);
     }
 }
