@@ -37,6 +37,7 @@ const TERMINAL = new Set(['COMPLETED', 'FRAUD_FLAGGED'])
 
 export default function Home() {
   const [customerId, setCustomerId] = useState('')
+  const [email, setEmail] = useState('')
   const [totalAmount, setTotalAmount] = useState('')
   const [productId, setProductId] = useState('')
   const [quantity, setQuantity] = useState('')
@@ -86,6 +87,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           customerId,
+          email,
           totalAmount: parseFloat(totalAmount),
           items: [{ productId, quantity: parseInt(quantity), price: parseFloat(price) }]
         })
@@ -141,6 +143,18 @@ export default function Home() {
                 placeholder="e.g. customer-42"
                 value={customerId}
                 onChange={e => setCustomerId(e.target.value)}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-zinc-400 mb-1.5 block">Email</label>
+              <input
+                type="email"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-colors placeholder:text-zinc-600"
+                placeholder="e.g. you@example.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 required
               />
             </div>
