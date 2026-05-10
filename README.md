@@ -1,6 +1,8 @@
 # Triage
 An Event-Driven order processing Pipeline with AI Fraud Detection.
 
+**Live demo:** https://triage-orders.netlify.app
+
 ## Architecture
 Architecture diagram coming soon.
 
