@@ -37,13 +37,13 @@ Six CDK stacks deployed to AWS:
 
 ## How It Works
 
-### Happy path
+### Primary path
 
 1. Browser submits `POST /orders` to API Gateway
 2. `createOrder` Lambda validates the payload, writes the order to DynamoDB with status `PENDING`, and publishes it to SQS — returns `201` immediately
 3. `worker` Lambda reads from SQS, idempotently updates status to `PROCESSING` (conditional `UpdateCommand` prevents duplicate processing), and starts a Step Functions execution
 4. Step Functions runs `AIFraudScore → Choice → CheckInventory → ProcessPayment → FulfillOrder → PublishOrderCompleted`
-5. `AIFraudScore` calls Amazon Bedrock (Claude) with order context and writes a risk score (0–1) and reasoning to DynamoDB
+5. `AIFraudScore` calls Amazon Bedrock (Anthropic API) with order context and writes a risk score (0–1) and reasoning to DynamoDB
 6. Clean orders (score ≤ 0.7) continue through the workflow; status is updated at each step
 7. On completion, Step Functions publishes `OrderCompleted` to a custom EventBridge bus
 8. `sendOrderConfirmation` Lambda fetches the order from DynamoDB, sends a confirmation email to the customer via SES
