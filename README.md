@@ -29,6 +29,8 @@ Full load test results (100 VUs, 84 req/s sustained, 30,334 total requests):
 
 p99 at full load (212ms) was lower than the smoke test p99 (275ms) — Lambda instances warmed up under sustained load. Bedrock runs async inside Step Functions and does not contribute to the `POST /orders` latency numbers above.
 
+A minimal Next.js frontend deployed to Netlify provides a live demo: form to place an order, real-time status polling every 2s, and fraud score + reasoning display for flagged orders. API Gateway is protected with CORS headers and a usage plan (10 req/s rate limit, 1,000 req/day quota).
+
 Lambda memory sizes tuned using AWS Lambda Power Tuning (10 invocations per memory configuration across 128/256/512/1024MB):
 
 | Lambda | Before | After | Speedup |
@@ -40,10 +42,11 @@ Lambda memory sizes tuned using AWS Lambda Power Tuning (10 invocations per memo
 | fulfillOrder | 128MB | 512MB | 5x faster |
 
 ## Tech Stack
-- **Languages:** TypeScript (CDK + Lambda handlers)
+- **Languages:** TypeScript (CDK + Lambda handlers), JavaScript (k6)
 - **AWS:** Lambda, API Gateway, SQS, Step Functions, DynamoDB, EventBridge, SES, Bedrock, CloudWatch, X-Ray
 - **IaC:** AWS CDK v2
-- **Dev tools:** LocalStack, Docker, GitHub Actions, Jest
+- **Frontend:** Next.js 16, Tailwind CSS v4, deployed on Netlify
+- **Dev tools:** LocalStack, Docker, GitHub Actions, Jest, k6
 
 ## Getting Started
 Setup and deployment instructions coming soon.
