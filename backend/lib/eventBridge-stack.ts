@@ -5,10 +5,15 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Runtime, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import { Table } from 'aws-cdk-lib/aws-dynamodb';
+
+interface EventBridgeStackProps extends cdk.StackProps {
+    orderTable: Table
+}
 
 export class EventBridgeStack extends cdk.Stack {
     public readonly orderEventBus: EventBus
-    constructor(scope: Construct, id: string, props: cdk.StackProps) {
+    constructor(scope: Construct, id: string, props: EventBridgeStackProps) {
         super(scope, id, props);
 
         this.orderEventBus = new EventBus(this, 'OrderEventBus');
@@ -19,7 +24,7 @@ export class EventBridgeStack extends cdk.Stack {
             runtime: Runtime.NODEJS_22_X,
             environment: {
                 SENDER_EMAIL: 'zenilkaria2006@gmail.com',
-                RECIPIENT_EMAIL: 'zenilkaria2006@gmail.com'
+                TABLE_NAME: props.orderTable.tableName
             },
             tracing: Tracing.ACTIVE
         });
@@ -28,6 +33,8 @@ export class EventBridgeStack extends cdk.Stack {
             actions: ['ses:SendEmail'],
             resources: ['*']
         }));
+
+        props.orderTable.grantReadData(sendOrderConfirmationHandler);
 
         new Rule(this, 'OrderCompletedRule', {
             eventBus: this.orderEventBus,

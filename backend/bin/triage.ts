@@ -11,7 +11,7 @@ const app = new cdk.App();
 
 const persistenceStack = new PersistenceStack(app, 'PersistenceStack', {});
 
-const eventBridgeStack = new EventBridgeStack(app, 'EventBridgeStack', {});
+const eventBridgeStack = new EventBridgeStack(app, 'EventBridgeStack', { orderTable: persistenceStack.orderTable });
 
 const workflowStack = new WorkflowStack(app, 'WorkflowStack', {orderTable: persistenceStack.orderTable, orderEventBus: eventBridgeStack.orderEventBus})
 

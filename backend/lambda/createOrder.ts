@@ -10,17 +10,18 @@ const sqsclient = new SQSClient({});
 export const handler = async (event: any) => {
     const body = JSON.parse(event.body);
 
-    if (!body.customerId || !body.items || !body.totalAmount) {
+    if (!body.customerId || !body.email || !body.items || !body.totalAmount) {
         return {
             headers: { 'Access-Control-Allow-Origin': '*' },
             statusCode: 400,
-            body: `Customer Order doesn't contain one of customerId, items, or totalAmount\n`
+            body: `Customer Order doesn't contain one of customerId, email, items, or totalAmount\n`
         }
     }
 
     const orderObject = {
         "orderID": randomUUID(),
         "customerId": body.customerId,
+        "email": body.email,
         "items": body.items,
         "totalAmount": body.totalAmount,
         "createdAt": new Date().toISOString(),
