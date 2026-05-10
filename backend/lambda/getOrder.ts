@@ -12,9 +12,17 @@ export const handler = async (event: any) => {
         Key: { orderID: orderId }
     }));
 
+    if (!orderObject.Item) {
+        return {
+            statusCode: 404,
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ error: 'Order not found' })
+        };
+    }
+
     return {
-        headers: { 'Access-Control-Allow-Origin': '*' },
         statusCode: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify(orderObject.Item)
     };
 }
