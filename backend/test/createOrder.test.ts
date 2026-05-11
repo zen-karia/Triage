@@ -31,7 +31,7 @@ test('returns 400 when the totalAmount is missing', async () => {
 
 test('returns 201 when the order is valid', async () => {
     const event = {
-        body: JSON.stringify({ customerId: 'c1', items: ['item1'], totalAmount: 100 })
+        body: JSON.stringify({ customerId: 'c1', email: 'test@example.com', items: ['item1'], totalAmount: 100 })
     };
 
     const result = await handler(event as any);
