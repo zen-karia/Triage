@@ -123,7 +123,7 @@ export default function Home() {
             Triage
           </h1>
           <p className="text-zinc-500 text-sm">Event-driven order processing · AI fraud detection · AWS</p>
-          <p className="text-zinc-600 text-xs">Portfolio project — no real payments are processed and no real orders are fulfilled</p>
+          <p className="text-zinc-400 text-xs">Portfolio project — no real payments are processed and no real orders are fulfilled</p>
         </div>
 
         {/* Two column layout */}
