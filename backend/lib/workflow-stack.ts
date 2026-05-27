@@ -147,7 +147,10 @@ export class WorkflowStack extends cdk.Stack {
 
         const definition = Chain.start(aiFraudScoreTask).next(fraudCheck);
 
-        this.orderStateMachine = new StateMachine(this, 'OrderWorkflow', {definition, tracingEnabled: true});
+        this.orderStateMachine = new StateMachine(this, 'OrderWorkflow', {
+            definitionBody: DefinitionBody.fromChainable(definition),
+            tracingEnabled: true
+        });
 
         props.orderTable.grantWriteData(aiFraudScoreHandler);
         props.orderTable.grantWriteData(checkInventoryHandler);
