@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Runtime, Tracing } from 'aws-cdk-lib/aws-lambda';
-import { StateMachine, Chain, Fail, TaskInput, Choice, Condition } from 'aws-cdk-lib/aws-stepfunctions';
+import { StateMachine, Chain, Fail, TaskInput, Choice, Condition, DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke, SqsSendMessage, EventBridgePutEvents } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
