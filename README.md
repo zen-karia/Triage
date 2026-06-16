@@ -106,6 +106,7 @@ These numbers compare worst-case (128MB) vs optimal configuration discovered by 
 - **IaC:** AWS CDK v2
 - **Frontend:** Next.js, Tailwind CSS v4, deployed on Netlify
 - **Testing:** Jest (unit tests), k6 (load testing)
+- **CI/CD:** GitHub Actions (build + test + format check on PR, manual-trigger CDK deploy to AWS)
 
 ---
 
