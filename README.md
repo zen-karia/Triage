@@ -74,16 +74,16 @@ Orders scoring above 0.7 are routed to a `ManualReviewQueue` (SQS) and an `Order
 
 ## Observed Metrics
 
-**Load test** — 100 VUs, 30s ramp, 5-minute hold (k6):
+**Load test** — 400 VUs, 30s ramp, 1-minute hold (k6, 33,440 total requests):
 
 | Metric | Value |
 |---|---|
-| Throughput | 84 req/s |
-| p95 latency | 130ms |
-| p99 latency | 212ms |
-| Error rate | 0% |
+| Throughput | 277 req/s |
+| p95 latency | 113ms |
+| p99 latency | 173ms |
+| Success rate | 99.28% |
 
-p99 at full load (212ms) was lower than the smoke test p99 (275ms) — Lambda instances warmed up under sustained load. Bedrock runs async inside Step Functions and does not contribute to `POST /orders` latency.
+The 0.71% errors at this load are Lambda concurrency throttles during ramp — under the account's 1000 unreserved concurrency limit, ~5 Lambdas in the workflow per order (~2,500 invocations/sec target) briefly outpaced container scale-up. Bedrock runs async inside Step Functions and does not contribute to `POST /orders` latency.
 
 **Lambda memory tuning** — AWS Lambda Power Tuning across 128/256/512/1024MB (10 invocations each):
 
