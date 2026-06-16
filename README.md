@@ -58,6 +58,12 @@ Orders scoring above 0.7 are routed to a `ManualReviewQueue` (SQS) and an `Order
 - SQS messages that fail 3 delivery attempts are moved to a dead-letter queue
 - DLQ depth is tracked on the CloudWatch dashboard
 
+### Observability
+
+- **X-Ray distributed tracing** across all Lambdas — every request traced end-to-end through API Gateway → createOrder → SQS → worker → Step Functions → workflow Lambdas
+- **CloudWatch dashboard** with request rate, p50/p95/p99 latency per Lambda, error rate, DLQ depth, fraud-flag rate, Bedrock latency, and per-order Bedrock cost
+- **Structured logs** with correlation IDs so a single order can be followed across stacks
+
 ---
 
 ## Tech Choices and Tradeoffs
