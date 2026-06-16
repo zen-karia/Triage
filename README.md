@@ -85,15 +85,17 @@ Orders scoring above 0.7 are routed to a `ManualReviewQueue` (SQS) and an `Order
 
 The 0.71% errors at this load are Lambda concurrency throttles during ramp — under the account's 1000 unreserved concurrency limit, ~5 Lambdas in the workflow per order (~2,500 invocations/sec target) briefly outpaced container scale-up. Bedrock runs async inside Step Functions and does not contribute to `POST /orders` latency.
 
-**Lambda memory tuning** — AWS Lambda Power Tuning across 128/256/512/1024MB (10 invocations each):
+**Lambda memory tuning** — AWS Lambda Power Tuning identifies the optimal memory configuration for each function by running it across multiple memory sizes. Higher memory means proportionally more CPU, which is often the bottleneck for short, CPU-bound handlers. The table below shows the optimal memory size chosen for each Lambda compared to the 128MB default:
 
-| Lambda | Before | After | Speedup |
+| Lambda | Default | Optimal | Speedup vs 128MB |
 |---|---|---|---|
-| createOrder | 128MB | 256MB | 5x |
-| worker | 128MB | 512MB | 55x |
-| checkInventory | 128MB | 1024MB | 112x |
-| processPayment | 128MB | 512MB | 32x |
-| fulfillOrder | 128MB | 512MB | 5x |
+| createOrder | 128MB | 256MB | ~5x |
+| worker | 128MB | 512MB | ~3x |
+| checkInventory | 128MB | 1024MB | ~3x |
+| processPayment | 128MB | 512MB | ~3x |
+| fulfillOrder | 128MB | 512MB | ~5x |
+
+These numbers compare worst-case (128MB) vs optimal configuration discovered by Power Tuning — production deploys with the optimal memory from day one.
 
 ---
 
